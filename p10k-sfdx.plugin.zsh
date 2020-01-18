@@ -119,18 +119,8 @@ POWERLEVEL9K_SFDX_ERROR_BACKGROUND=97
 POWERLEVEL9K_SFDX_EXPIRED_BACKGROUND=102
 POWERLEVEL9K_SFDX_SHOW_ON_COMMAND='sfdx'
 
-function _p9k_addSegmentToRightPromptAt() {
-  local segment=$1
-  local at=$2
-  [[ -n "$segment" ]] || return 1
-  [[ $at == <1-> ]] || return 1
-  if (( ! POWERLEVEL9K_RIGHT_PROMPT_ELEMENTS[(Ie)$segment] )); then
-    typeset -g POWERLEVEL9K_RIGHT_PROMPT_ELEMENTS[$at,0]=$segment
-    # If p10k is already loaded, reload configuration.
-    # This works even with POWERLEVEL9K_DISABLE_HOT_RELOAD=true.
-    (( ! $+functions[p10k] )) || p10k reload
-    return 0
-  fi
-}
-
-_p9k_addSegmentToRightPromptAt sfdx 18
+if (( $+functions[p9kaddSegmentToRightPromptAt] )); then
+  p9kaddSegmentToRightPromptAt sfdx 18
+else
+  print -rP "Source module %Bjayree/p10k-load-config%b before %Bjayree/p10k-sfdx%b to enable %Bsfdx%b prompt segment."
+fi
