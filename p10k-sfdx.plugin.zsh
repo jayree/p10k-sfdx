@@ -113,14 +113,24 @@ function prompt_sfdx() {
   fi
 }
 
-POWERLEVEL9K_SFDX_LOCAL_BACKGROUND=38
-POWERLEVEL9K_SFDX_GLOBAL_BACKGROUND=208
-POWERLEVEL9K_SFDX_ERROR_BACKGROUND=97
-POWERLEVEL9K_SFDX_EXPIRED_BACKGROUND=102
-POWERLEVEL9K_SFDX_SHOW_ON_COMMAND='sfdx'
 
-if (( $+functions[p9kaddSegmentToRightPromptAt] )); then
+if (( $+functions[p9kaddSegmentToRightPromptAt] )) && (( $+functions[p10kgetstyle] )); then
   p9kaddSegmentToRightPromptAt sfdx 18
+  case $(p10kgetstyle) in
+    rainbow)
+      POWERLEVEL9K_SFDX_LOCAL_BACKGROUND=38
+      POWERLEVEL9K_SFDX_GLOBAL_BACKGROUND=208
+      POWERLEVEL9K_SFDX_ERROR_BACKGROUND=97
+      POWERLEVEL9K_SFDX_EXPIRED_BACKGROUND=102
+    ;;
+    *)
+      POWERLEVEL9K_SFDX_LOCAL_FOREGROUND=38
+      POWERLEVEL9K_SFDX_GLOBAL_FOREGROUND=208
+      POWERLEVEL9K_SFDX_ERROR_FOREGROUND=97
+      POWERLEVEL9K_SFDX_EXPIRED_FOREGROUND=102
+    ;;
+  esac
+  POWERLEVEL9K_SFDX_SHOW_ON_COMMAND='sfdx'
 else
   print -rP "Source module %Bjayree/p10k-load-config%b before %Bjayree/p10k-sfdx%b to enable %Bsfdx%b prompt segment."
 fi
