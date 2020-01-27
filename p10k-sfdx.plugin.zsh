@@ -40,8 +40,10 @@ _get_scratchOrgExpirationDate() {
 function prompt_sfdx() {
   if (( $+commands[jq] )) && (( $+commands[sfdx] )); then
     
-    if _find_local_sfdx_config_file "$_p9k_pwd"; then
+    if _find_local_sfdx_config_file "${(%):-%/}"; then
       local sfdx_config_file=$_p9k_ret
+    else
+      return 0
     fi
     
     if _get_aliaseOrUsername "$sfdx_config_file"; then
