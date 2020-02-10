@@ -3,8 +3,8 @@
 _find_local_sfdx_config_file() {
   local dir="$1"
   while true; do
-    _p9k_ret="${dir}/.sfdx/sfdx-config.json"
-    [[ -s $_p9k_ret ]] && return 0
+    _p9k__ret="${dir}/.sfdx/sfdx-config.json"
+    [[ -s $_p9k__ret ]] && return 0
     [[ $dir == / ]] && return 1
     dir=${dir:h}
   done
@@ -12,19 +12,19 @@ _find_local_sfdx_config_file() {
 
 _get_aliaseOrUsername() {
   [[ -s "$1" ]] || return 1
-  _p9k_ret="$(jq -r '.defaultusername|strings' $1 2>/dev/null)"
-  [[ -n "$_p9k_ret" ]] && return 0
+  _p9k__ret="$(jq -r '.defaultusername|strings' $1 2>/dev/null)"
+  [[ -n "$_p9k__ret" ]] && return 0
   return 1
 }
 
 _get_userName() {
   [[ -n "$1" ]] || return 1
   [[ -s "$HOME/.sfdx/alias.json" ]] || return 1
-  _p9k_ret="$(jq --arg aliaseOrUsername "$1" -r '.orgs[$aliaseOrUsername]|strings' $HOME/.sfdx/alias.json 2>/dev/null)"
-  if [[ -n "$_p9k_ret" ]]; then
+  _p9k__ret="$(jq --arg aliaseOrUsername "$1" -r '.orgs[$aliaseOrUsername]|strings' $HOME/.sfdx/alias.json 2>/dev/null)"
+  if [[ -n "$_p9k__ret" ]]; then
     return 0
   else
-    _p9k_ret="$1"
+    _p9k__ret="$1"
     return 0
   fi
   return 1
@@ -32,8 +32,8 @@ _get_userName() {
 
 _get_scratchOrgExpirationDate() {
   [[ -n "$1" ]] || return 1
-  _p9k_ret=$(sfdx force:org:display --targetusername=$1 --json 2>&1 | jq -r 'if .status == 1 then "error" elif .result.status == "Active" then .result.expirationDate elif .result.status == "Expired" then "expired" else "sbx" end' 2>/dev/null)
-  [[ -n "$_p9k_ret" ]] && return 0
+  _p9k__ret=$(sfdx force:org:display --targetusername=$1 --json 2>&1 | jq -r 'if .status == 1 then "error" elif .result.status == "Active" then .result.expirationDate elif .result.status == "Expired" then "expired" else "sbx" end' 2>/dev/null)
+  [[ -n "$_p9k__ret" ]] && return 0
   return 1
 }
 
@@ -41,16 +41,16 @@ function prompt_sfdx() {
   if (( $+commands[jq] )) && (( $+commands[sfdx] )); then
     
     if _find_local_sfdx_config_file "${(%):-%/}"; then
-      local sfdx_config_file=$_p9k_ret
+      local sfdx_config_file=$_p9k__ret
     else
       return 0
     fi
     
     if _get_aliaseOrUsername "$sfdx_config_file"; then
-      local aliaseOrUsername=$_p9k_ret
+      local aliaseOrUsername=$_p9k__ret
       local global=false
       elif _get_aliaseOrUsername "$HOME/.sfdx/sfdx-config.json"; then
-      local aliaseOrUsername=$_p9k_ret
+      local aliaseOrUsername=$_p9k__ret
       local global=true
     else
       return 0
@@ -65,18 +65,18 @@ function prompt_sfdx() {
     fi
     
     if _get_userName "$aliaseOrUsername"; then
-      local username=$_p9k_ret
+      local username=$_p9k__ret
       local authInfoFile="$HOME/.sfdx/$username.json"
     fi
     
     if [[ -s $authInfoFile ]]; then
       if ! _p9k_cache_stat_get $0 $authInfoFile; then
         if _get_scratchOrgExpirationDate "$aliaseOrUsername"; then
-          local expirationDate=$_p9k_ret
+          local expirationDate=$_p9k__ret
           _p9k_cache_stat_set "$expirationDate"
         fi
       else
-        [[ -n $_p9k_cache_val[1] ]] && local expirationDate=$_p9k_cache_val[1]
+        [[ -n $_p9k__cache_val[1] ]] && local expirationDate=$_p9k__cache_val[1]
       fi
       case $expirationDate in
         error)
