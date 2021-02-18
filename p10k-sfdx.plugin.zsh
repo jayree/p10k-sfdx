@@ -115,24 +115,50 @@ function prompt_sfdx() {
   fi
 }
 
+#
+# adds a new segment $1 to the right prompt at position $2
+#
+(( $+functions[p9kaddSegmentToRightPromptAt] )) ||
+function p9kaddSegmentToRightPromptAt() {
+  local segment=$1
+  local at=$2
+  [[ -n "$segment" ]] || return 1
+  [[ $at == <1-> ]] || return 1
+  if (( ! POWERLEVEL9K_RIGHT_PROMPT_ELEMENTS[(Ie)$segment] )); then
+    typeset -g POWERLEVEL9K_RIGHT_PROMPT_ELEMENTS[$at,0]=$segment
+    # If p10k is already loaded, reload configuration.
+    # This works even with POWERLEVEL9K_DISABLE_HOT_RELOAD=true.
+    (( ! $+functions[p10k] )) || p10k reload
+    return 0
+  fi
+}
 
-if (( $+functions[p9kaddSegmentToRightPromptAt] )) && (( $+functions[p10kgetstyle] )); then
-  p9kaddSegmentToRightPromptAt sfdx 18
-  case $(p10kgetstyle) in
-    rainbow)
-      POWERLEVEL9K_SFDX_LOCAL_BACKGROUND=38
-      POWERLEVEL9K_SFDX_GLOBAL_BACKGROUND=208
-      POWERLEVEL9K_SFDX_ERROR_BACKGROUND=97
-      POWERLEVEL9K_SFDX_EXPIRED_BACKGROUND=102
-    ;;
-    *)
-      POWERLEVEL9K_SFDX_LOCAL_FOREGROUND=38
-      POWERLEVEL9K_SFDX_GLOBAL_FOREGROUND=208
-      POWERLEVEL9K_SFDX_ERROR_FOREGROUND=97
-      POWERLEVEL9K_SFDX_EXPIRED_FOREGROUND=102
-    ;;
-  esac
-  POWERLEVEL9K_SFDX_SHOW_ON_COMMAND='sfdx'
-else
-  print -rP "Source module %Bjayree/p10k-load-config%b before %Bjayree/p10k-sfdx%b to enable %Bsfdx%b prompt segment."
-fi
+#
+# gets the current powerlevel10k style
+#
+(( $+functions[p10kgetstyle] )) ||
+function p10kgetstyle() {
+  if [[ -f $POWERLEVEL9K_CONFIG_FILE ]]; then
+    local lines=( "${(@f)"$(<$POWERLEVEL9K_CONFIG_FILE)"}" )
+    if [[ ${(@M)lines:#(#b)*p10k-(*).zsh*} ]]; then
+      echo $match[1]
+    fi
+  fi
+}
+
+p9kaddSegmentToRightPromptAt sfdx 18
+case $(p10kgetstyle) in
+  rainbow)
+    POWERLEVEL9K_SFDX_LOCAL_BACKGROUND=38
+    POWERLEVEL9K_SFDX_GLOBAL_BACKGROUND=208
+    POWERLEVEL9K_SFDX_ERROR_BACKGROUND=97
+    POWERLEVEL9K_SFDX_EXPIRED_BACKGROUND=102   
+  ;;
+  *)
+    POWERLEVEL9K_SFDX_LOCAL_FOREGROUND=38  
+    POWERLEVEL9K_SFDX_GLOBAL_FOREGROUND=208
+    POWERLEVEL9K_SFDX_ERROR_FOREGROUND=97
+    POWERLEVEL9K_SFDX_EXPIRED_FOREGROUND=102
+  ;;
+esac
+POWERLEVEL9K_SFDX_SHOW_ON_COMMAND='sfdx'
