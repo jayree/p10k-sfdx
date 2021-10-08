@@ -92,8 +92,8 @@ function prompt_sfdx() {
         ;;
         *)
           if [[ -n $expirationDate ]]; then
-            local date1=$(strftime -r '%F' $expirationDate)
-            local date2=$(strftime -r '%F' $(date "+%Y-%m-%d"))
+            local date1=$(strftime -r '%Y-%m-%d' $expirationDate)
+            local date2=$((int(EPOCHREALTIME)))
             ([[ -n "$date1" ]] && [[ -n "$date2" ]]) || break
             local diff=$(( $date1 - $date2 ))
             if (( $diff > 0)); then
@@ -111,7 +111,7 @@ function prompt_sfdx() {
       local displayname="$displayname (error)"
     fi
     
-    p10k segment -s $state -i $'\uf65e' -b 68 -f white -t "$displayname"
+    p10k segment -s $state -b 68 -f white -t "$displayname"
   fi
 }
 
