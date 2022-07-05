@@ -70,7 +70,7 @@ function prompt_sfdx() {
     fi
     
     if [[ -s $authInfoFile ]]; then
-      if ! _p9k_cache_stat_get $0 $authInfoFile; then
+      if ! _p9k_cache_stat_get $0 $sfdx_config_file; then
         if _get_scratchOrgExpirationDate "$aliaseOrUsername"; then
           local expirationDate=$_p9k__ret
           _p9k_cache_stat_set "$expirationDate"
