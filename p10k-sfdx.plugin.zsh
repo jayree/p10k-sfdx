@@ -53,9 +53,9 @@ function prompt_sfdx() {
     fi
 
     if _get_devhubAliasOrUsername "$sfdx_config_file"; then
-       p10k segment  -b 68 -f white -t "$_p9k__ret"
+       p10k segment  -b 68 -f white -t "☁️ 🏠$_p9k__ret"
     elif _get_devhubAliasOrUsername "$HOME/.sfdx/sfdx-config.json"; then
-       p10k segment  -b 68 -f white -t "$_p9k__ret"
+       p10k segment  -b 68 -f white -t "☁️ 🏠$_p9k__ret"
     fi
 
     if _get_aliaseOrUsername "$sfdx_config_file"; then
@@ -123,7 +123,7 @@ function prompt_sfdx() {
       local displayname="$displayname (error)"
     fi
     
-    p10k segment -s $state -b 68 -f white -t "$displayname"
+    p10k segment -s $state -b 68 -f white -t "☁️🎯$displayname"
   fi
 }
 
