@@ -17,6 +17,12 @@ _get_aliaseOrUsername() {
   return 1
 }
 
+_get_devhubAliasOrUsername() {
+  [[ -s "$1" ]] || return 1
+  _p9k__ret="$(jq -r '.defaultdevhubusername|strings' $1 2>/dev/null)"
+  [[ -n "$_p9k__ret" ]] && return 0
+  return 1
+}
 _get_userName() {
   [[ -n "$1" ]] || return 1
   [[ -s "$HOME/.sfdx/alias.json" ]] || return 1
@@ -45,7 +51,13 @@ function prompt_sfdx() {
     else
       return 0
     fi
-    
+
+    if _get_devhubAliasOrUsername "$sfdx_config_file"; then
+       p10k segment  -b 68 -f white -t "☁️ 🏠$_p9k__ret"
+    elif _get_devhubAliasOrUsername "$HOME/.sfdx/sfdx-config.json"; then
+       p10k segment  -b 68 -f white -t "☁️ 🏠$_p9k__ret"
+    fi
+
     if _get_aliaseOrUsername "$sfdx_config_file"; then
       local aliaseOrUsername=$_p9k__ret
       local global=false
@@ -111,7 +123,7 @@ function prompt_sfdx() {
       local displayname="$displayname (error)"
     fi
     
-    p10k segment -s $state -b 68 -f white -t "$displayname"
+    p10k segment -s $state -b 68 -f white -t "☁️🎯$displayname"
   fi
 }
 
