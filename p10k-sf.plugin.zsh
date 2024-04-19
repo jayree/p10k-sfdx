@@ -1,9 +1,9 @@
 #   for i in {0..255}; do print -Pn "%K{$i}${(l:3::0:)i}%k " ${${(M)$((i%8)):#7}:+$'\n'}; done
 
-_find_local_sfdx_config_file() {
+_find_local_sf_config_file() {
   local dir="$1"
   while true; do
-    _p9k__ret="${dir}/.sfdx/sfdx-config.json"
+    _p9k__ret="${dir}/.sf/config.json"
     [[ -s $_p9k__ret ]] && return 0
     [[ $dir == / ]] && return 1
     dir=${dir:h}
@@ -12,7 +12,7 @@ _find_local_sfdx_config_file() {
 
 _get_aliaseOrUsername() {
   [[ -s "$1" ]] || return 1
-  _p9k__ret="$(jq -r '.defaultusername|strings' $1 2>/dev/null)"
+  _p9k__ret="$(jq -r '.["target-org"]|strings' $1 2>/dev/null)"
   [[ -n "$_p9k__ret" ]] && return 0
   return 1
 }
@@ -32,31 +32,31 @@ _get_userName() {
 
 _get_scratchOrgExpirationDate() {
   [[ -n "$1" ]] || return 1
-  _p9k__ret=$(sfdx force:org:display --targetusername=$1 --json 2>&1 | jq -r 'if .status == 1 then "error" elif .result.status == "Active" then .result.expirationDate elif .result.status == "Expired" then "expired" else "sbx" end' 2>/dev/null)
+  _p9k__ret=$(sf org display --target-org=$1 --json 2>&1 | jq -r 'if .status == 1 then "error" elif .result.status == "Active" then .result.expirationDate elif .result.status == "Expired" then "expired" else "sbx" end' 2>/dev/null)
   [[ -n "$_p9k__ret" ]] && return 0
   return 1
 }
 
-function prompt_sfdx() {
-  if (( $+commands[jq] )) && (( $+commands[sfdx] )); then
-    
-    if _find_local_sfdx_config_file "${(%):-%/}"; then
-      local sfdx_config_file=$_p9k__ret
+function prompt_sf() {
+  if (( $+commands[jq] )) && (( $+commands[sf] )); then
+
+    if _find_local_sf_config_file "${(%):-%/}"; then
+      local sf_config_file=$_p9k__ret
     else
       return 0
     fi
     
-    if _get_aliaseOrUsername "$sfdx_config_file"; then
+    if _get_aliaseOrUsername "$sf_config_file"; then
       local aliaseOrUsername=$_p9k__ret
       local global=false
-      elif _get_aliaseOrUsername "$HOME/.sfdx/sfdx-config.json"; then
+      elif _get_aliaseOrUsername "$HOME/.sf/config.json"; then
       local aliaseOrUsername=$_p9k__ret
       local global=true
     else
       return 0
     fi
     
-    if [[ "$global" = "true" ]] || [[ $sfdx_config_file -ef $HOME/.sfdx/sfdx-config.json ]]; then
+    if [[ "$global" = "true" ]] || [[ $sf_config_file -ef $HOME/.sf/config.json ]]; then
       local state=GLOBAL
       local displayname="(global) $aliaseOrUsername"
     else
@@ -70,7 +70,7 @@ function prompt_sfdx() {
     fi
     
     if [[ -s $authInfoFile ]]; then
-      if ! _p9k_cache_stat_get $0 $sfdx_config_file; then
+      if ! _p9k_cache_stat_get $0 $sf_config_file; then
         if _get_scratchOrgExpirationDate "$aliaseOrUsername"; then
           local expirationDate=$_p9k__ret
           _p9k_cache_stat_set "$expirationDate"
@@ -146,19 +146,19 @@ function p10kgetstyle() {
   fi
 }
 
-p9kaddSegmentToRightPromptAt sfdx 18
+p9kaddSegmentToRightPromptAt sf 18
 case $(p10kgetstyle) in
   rainbow)
-    POWERLEVEL9K_SFDX_LOCAL_BACKGROUND=38
-    POWERLEVEL9K_SFDX_GLOBAL_BACKGROUND=208
-    POWERLEVEL9K_SFDX_ERROR_BACKGROUND=97
-    POWERLEVEL9K_SFDX_EXPIRED_BACKGROUND=102   
+    POWERLEVEL9K_SF_LOCAL_BACKGROUND=38
+    POWERLEVEL9K_SF_GLOBAL_BACKGROUND=208
+    POWERLEVEL9K_SF_ERROR_BACKGROUND=97
+    POWERLEVEL9K_SF_EXPIRED_BACKGROUND=102   
   ;;
   *)
-    POWERLEVEL9K_SFDX_LOCAL_FOREGROUND=38  
-    POWERLEVEL9K_SFDX_GLOBAL_FOREGROUND=208
-    POWERLEVEL9K_SFDX_ERROR_FOREGROUND=97
-    POWERLEVEL9K_SFDX_EXPIRED_FOREGROUND=102
+    POWERLEVEL9K_SF_LOCAL_FOREGROUND=38  
+    POWERLEVEL9K_SF_GLOBAL_FOREGROUND=208
+    POWERLEVEL9K_SF_ERROR_FOREGROUND=97
+    POWERLEVEL9K_SF_EXPIRED_FOREGROUND=102
   ;;
 esac
-POWERLEVEL9K_SFDX_SHOW_ON_COMMAND='sfdx'
+POWERLEVEL9K_SF_SHOW_ON_COMMAND='sf'
